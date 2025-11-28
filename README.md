@@ -35,6 +35,7 @@ During the development of this POC, several assumptions were made:
 
 While this POC successfully demonstrates the core concept, several areas could be improved for a production-ready application:
 
+*   **Database Migrations and Seeders**: Implement more dynamic database schema handling and seeders for better approach
 *   **Robust Error Handling**: Implement a more comprehensive error handling and logging strategy to better diagnose issues in a live environment.
 *   **Input Validation**: Add strict input validation for all API endpoints to ensure data integrity and improve security.
 *   **Comprehensive Testing**: Develop a full suite of unit, integration, and end-to-end tests to ensure the API is reliable and bug-free.
@@ -112,3 +113,88 @@ To run this project locally, you will need the following:
     ```
 
 The API server should now be running on your local machine.
+
+
+
+# 💾 Database Schema
+
+---
+
+## 🏛️ Database Structure Overview
+
+The schema consists of four main tables designed to manage users, bookable vehicles, service bookings, and associated communications.
+
+| Table Name | Description | Key Fields |
+| :--- | :--- | :--- |
+| **users** | Stores user authentication and profile information. | `id` (Primary Key) |
+| **vehicles** | Stores details of all vehicles available for booking. | `id` (Primary Key) |
+| **bookings** | Stores records of all service bookings made by users. | `id` (Primary Key), `user_id` (FK), `vehicle_id` (FK) |
+| **messages** | Stores communication messages related to specific bookings. | `id` (Primary Key), `booking_id` (FK) |
+
+---
+
+## 📝 Table Details
+
+### 1. `users` Table
+
+*Purpose:* To store user account information.
+
+| Field Name | Data Type | Description | Constraints / Notes |
+| :--- | :--- | :--- | :--- |
+| **id** | `integer` | Unique identifier for the user. | **Primary Key** |
+| **name** | `varchar` | User's full name. | |
+| **email** | `varchar` | User's email address. | Typically Unique |
+| **password** | `varchar` | Hashed password for user authentication. | |
+| **role** | `varchar` | User's role (e.g., 'customer', 'admin'). | |
+| **created_at** | `timestamp` | Date and time the user record was created. | |
+
+### 2. `vehicles` Table
+
+*Purpose:* To catalogue the vehicles available for service or rental.
+
+| Field Name | Data Type | Description | Constraints / Notes |
+| :--- | :--- | :--- | :--- |
+| **id** | `integer` | Unique identifier for the vehicle. | **Primary Key** |
+| **make** | `varchar` | Manufacturer of the vehicle. | |
+| **model** | `varchar` | Specific model of the vehicle. | |
+| **year** | `varchar` | Manufacturing year of the vehicle. | |
+| **created_at** | `timestamp` | Date and time the vehicle record was created. | |
+
+### 3. `bookings` Table
+
+*Purpose:* To record the details of a service booking.
+
+| Field Name | Data Type | Description | Constraints / Notes |
+| :--- | :--- | :--- | :--- |
+| **id** | `integer` | Unique identifier for the booking. | **Primary Key** |
+| **user_id** | `integer` | ID of the user who made the booking. | **Foreign Key** (`users.id`), **NOT NULL** (NN) |
+| **reference** | `varchar` | Unique booking reference/code. | |
+| **service_type** | `varchar` | Type of service booked. | |
+| **vehicle_id** | `integer` | ID of the vehicle associated with the booking. | **Foreign Key** (`vehicles.id`), **NOT NULL** (NN) |
+| **description**| `varchar` | Detailed description or notes about the service. | |
+| **status** | `varchar` | Current status of the booking (e.g., 'pending', 'confirmed'). | |
+| **created_at** | `timestamp` | Date and time the booking record was created. | |
+
+### 4. `messages` Table
+
+*Purpose:* To store communication logs related to a specific booking.
+
+| Field Name | Data Type | Description | Constraints / Notes |
+| :--- | :--- | :--- | :--- |
+| **id** | `integer` | Unique identifier for the message. | **Primary Key** |
+| **booking_id** | `integer` | ID of the booking the message relates to. | **Foreign Key** (`bookings.id`), **NOT NULL** (NN) |
+| **sender** | `varchar` | The party who sent the message (e.g., 'customer', 'admin'). | |
+| **content** | `varchar` | The body text of the message. | |
+| **created_at** | `timestamp` | Date and time the message was created. | |
+
+---
+
+## 🔗 Relationships (Foreign Keys)
+
+| Source Table (Child) | Field | Target Table (Parent) | Relationship Summary |
+| :--- | :--- | :--- | :--- |
+| **bookings** | `user_id` | **users** | One User to Many Bookings. |
+| **bookings** | `vehicle_id` | **vehicles** | One Vehicle to Many Bookings (A vehicle can be booked many times). |
+| **messages** | `booking_id` | **bookings** | One Booking to Many Messages. |
+
+---
